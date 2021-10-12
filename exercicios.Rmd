@@ -1,0 +1,143 @@
+---
+title: "Untitled"
+author: "Helena"
+date: "26/07/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## Quiz 1
+
+```{r q1ex01}
+
+#fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+
+#download.file(url = fileURL, destfile = "./ex1file.csv")
+
+#ex1data <- read.csv("ex1file.csv")
+
+head(ex1data)
+
+table(ex1data$VAL)
+
+```
+
+```{r q1ex03}
+
+#fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FDATA.gov_NGAP.xlsx"
+
+#download.file(url = fileURL, destfile = "./ex3file2.xlsx")
+
+#library(xlsx)
+
+colIndex <- 7:15
+rowIndex <- 18:23
+
+ex3datasub <- read.xlsx("ex3file2.xlsx", sheetIndex=1, header = TRUE, colIndex = colIndex, rowIndex = rowIndex)
+
+#head(ex3data)
+
+
+sum(ex3datasub$Zip*ex3datasub$Ext,na.rm=T)
+
+```
+
+
+```{r q1ex04}
+
+fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Frestaurants.xml"
+
+#library(XML)
+
+ex4data <- xmlTreeParse(fileURL, useInternal = TRUE)
+
+ex4rootNode <- xmlRoot(ex4data)
+
+xmlName(ex4rootNode)
+
+```
+
+
+```{r q1ex05}
+
+#fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06pid.csv"
+
+#download.file(url = fileURL, destfile = "./ex5file.csv")
+
+system.time(DT <- fread("ex1file.csv", sep = ",", header = TRUE, quote = ""))
+
+head(DT)
+colnames(DT)
+
+print("---- sapply(split(DT$pwgtp15,DT$SEX),mean) ----")
+system.time(sapply(split(DT$pwgtp15,DT$SEX),mean))
+
+print("---- DT[,mean(pwgtp15),by=SEX] ----")
+system.time(DT[,mean(pwgtp15),by=SEX])  
+
+print("---- tapply(DT$pwgtp15,DT$SEX,mean) ----")
+system.time(tapply(DT$pwgtp15,DT$SEX,mean))
+
+print("---- mean(DT$pwgtp15,by=DT$SEX) ----")
+system.time(mean(DT$pwgtp15,by=DT$SEX))
+
+print("---- rowMeans(DT)[DT$SEX==1]; rowMeans(DT)[DT$SEX==2] ----")
+system.time(rowMeans(DT)[DT$SEX==1]; rowMeans(DT)[DT$SEX==2])
+
+print("---- mean(DT[DT$SEX==1,]$pwgtp15); mean(DT[DT$SEX==2,]$pwgtp15) ----")
+system.time(mean(DT[DT$SEX==1,]$pwgtp15); mean(DT[DT$SEX==2,]$pwgtp15))
+  
+```
+
+
+```{r w2}
+#library(RMySQL)
+
+ucscDb <- dbConnect(MySQL(), user = "genome", host = "genome-mysql.cse.ucsc.edu")
+
+result <- dbGetQuery(ucscDb, "show databases;"); dbDisconnect(ucscDb);
+
+head(result) # lista de data bases diponiveis
+
+hg19 <- dbConnect(MySQL(), user = "genome", db = "hg19", host = "genome-mysql.cse.ucsc.edu")
+
+allTables <- dbListTables(hg19) # lista de tabelas da DB hg19
+
+length(allTables)
+
+allTables[1:5]
+
+dbListFields(hg19, "affyU133Plus2") # nome das colunas da tabela
+
+dbGetQuery(hg19, "select count(*) from affyU133Plus2") # numero de linhas
+
+affyData <- dbReadTable(hg19, "affyU133Plus2")
+
+head(affyData)
+
+query <- dbSendQuery(hg19, "select * from affyU133Plus2 where misMatches between 1 and 3")
+
+affyMis <- fetch(query); quantile(affyMis$misMatches)
+
+affyMisSmall <- fetch(query, n=10); dbClearResult(query);
+
+dim(affyMisSmall)
+
+dbDisconnect(hg19)
+
+```
+
+
+
+
+
